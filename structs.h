@@ -1,25 +1,27 @@
 #pragma once
 #include <string>
-using std::string;
+using std::wstring;
 
 constexpr int NUM_OF_MARKS = 5;
+constexpr int PESENT_OF_SCHOLARHSIP = 40;
+constexpr char OUT_FILENAME[] = "rating.csv";
 
 struct STUD_READ_DATA
 {
-	string surname;
+	wstring surname;
 	int marks[NUM_OF_MARKS];
-	string is_contract;
+	wstring is_contract;
 };
 
 struct STUD_TABLE_DATA
 {
-	string surname;
+	wstring surname;
 	float GPA;
 	bool is_contract;
 };
 
-struct SRUD_WRITE_DATA
+struct STUD_WRITE_DATA
 {
-	string surname;
+	wstring surname;
 	float GPA;
 };
