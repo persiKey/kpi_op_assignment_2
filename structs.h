@@ -19,9 +19,3 @@ struct STUD_TABLE_DATA
 	float GPA;
 	bool is_contract;
 };
-
-struct STUD_WRITE_DATA
-{
-	wstring surname;
-	float GPA;
-};
