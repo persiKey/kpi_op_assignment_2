@@ -6,7 +6,7 @@
 using std::string;
 using std::vector;
 
-#define UTF_8
+#define ASCII
 
 int main()
 {
@@ -17,16 +17,17 @@ int main()
 #endif
 	vector<string> File_paths;
 	vector<STUD_TABLE_DATA> Table;
+	vector<STUD_TABLE_DATA> ScholarTable;
 
 	GetFileLocations(File_paths);
 	ProcedeFiles(File_paths, Table);
+
 	PrintTable(Table);
-	vector<STUD_TABLE_DATA> ScholarTable;
-	GetScholarRating(Table, ScholarTable);
+	GetBudgetRating(Table, ScholarTable);
 	PrintTableToFile(ScholarTable);
 
 	setlocale(LC_ALL, "Ukrainian");
-	wprintf(L"\nМінімальний середній бал серед стипендіатів: %.3f", GetMinGPA(ScholarTable));
+	wprintf(L"Мінімальний середній бал серед стипендіатів: %.3f", GetMinScholarGPA(ScholarTable));
 
 	return 0;
 }

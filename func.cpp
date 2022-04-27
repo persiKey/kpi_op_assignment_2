@@ -9,7 +9,6 @@
 #include <iomanip>
 
 using std::cin;
-
 using std::wcout;
 using std::string;
 using std::wstring;
@@ -17,6 +16,7 @@ using std::vector;
 using std::wifstream;
 using std::wofstream;
 using std::getline;
+using std::setw;
 
 
 void GetFileLocations(vector<string> &file_paths)
@@ -30,9 +30,11 @@ void GetFileLocations(vector<string> &file_paths)
 	if (findFile == INVALID_HANDLE_VALUE)
 	{
 		if (GetLastError() == ERROR_FILE_NOT_FOUND)
-		{
-			wcout << L"File not found!Shutting down\n"; exit(-1);
-		}
+			wcout << L"File not found!"; 
+		else
+			wcout << L"Something went wrong!";
+		wcout << "Shutting down\n";
+		exit(-1);
 	}
 	do
 	{
@@ -83,44 +85,54 @@ void ProcedeFiles(const vector<string>& file_paths, vector<STUD_TABLE_DATA>&Tabl
 
 void PrintTable(const vector<STUD_TABLE_DATA>& Table)
 {
+	wcout << std::left << setw(20) << "Прізвище" << setw(8) << "Сер.бал" << std::right << setw(12) << "Контрактник" << std::endl << std::endl ;
 	for (int i = 0; i < Table.size(); ++i)
 	{
-		wcout << Table[i].surname << L'\t' << Table[i].GPA << L'\t' << Table[i].is_contract << std::endl;
+		wcout << std::left << setw(20) <<Table[i].surname 
+			<< setw(8) << std::fixed <<std::setprecision(3) << Table[i].GPA
+			<< std::right << setw(12) << Table[i].is_contract << L"\n";
 	}
+	wcout << std::endl;
 }
 
-void GetScholarRating(const vector<STUD_TABLE_DATA>& Table, vector<STUD_TABLE_DATA>& ScholarshipTable)
+inline void SortTable(vector<STUD_TABLE_DATA>& Table)
 {
-	ScholarshipTable.clear();
-	for (int i = 0; i < Table.size(); i++)
-	{
-		//???
-		if (Table[i].is_contract == false)
-			ScholarshipTable.push_back(Table[i]);
-	}
-	std::sort(ScholarshipTable.begin(), ScholarshipTable.end(),
+	std::sort(Table.begin(), Table.end(),
 		[](STUD_TABLE_DATA first, STUD_TABLE_DATA second)
 		{return first.GPA > second.GPA; });
 }
 
-void PrintTableToFile(const vector<STUD_TABLE_DATA>& Table)
+void GetBudgetRating(const vector<STUD_TABLE_DATA>& Table, vector<STUD_TABLE_DATA>& BudgetTable)
+{
+	BudgetTable.clear();
+	for (int i = 0; i < Table.size(); i++)
+	{
+		//???
+		if (Table[i].is_contract == false)
+			BudgetTable.push_back(Table[i]);
+	}
+	SortTable(BudgetTable);
+}
+
+
+
+void PrintTableToFile(const vector<STUD_TABLE_DATA>& Table, int persents)
 {
 	wofstream OutFile(OUT_FILENAME);
-	for (int i = 0; i < (int)Table.size()*(PESENT_OF_SCHOLARHSIP/100.0)-1; i++)
+	for (int i = 0; i < int(Table.size()*(persents/100.0)); i++)
 	{
 		OutFile << Table[i].surname; OutFile << L',';
-		OutFile <<Table[i].GPA; OutFile << L'\n';
+		OutFile << std::fixed << std::setprecision(3) << Table[i].GPA; OutFile << L'\n';
 	}
-
 	OutFile.close();
 }
 
-float GetMinGPA(const vector<STUD_TABLE_DATA>& Table)
+float GetMinScholarGPA(const vector<STUD_TABLE_DATA>& ScholarTable)
 {
-	if (Table.size() < 3)
+	if (ScholarTable.size() < 100.0/PESENT_OF_SCHOLARHSIP)
 	{
 		wcout << L"Too few students!\n"; 
 		return -1;
 	}
-	return Table[Table.size() * (PESENT_OF_SCHOLARHSIP / 100.0)-1].GPA;
+	return ScholarTable[ScholarTable.size() * (PESENT_OF_SCHOLARHSIP / 100.0)-1].GPA;
 }
