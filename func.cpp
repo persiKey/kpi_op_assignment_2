@@ -58,28 +58,37 @@ STUD_TABLE_DATA Read_to_Table(STUD_READ_DATA &data)
 	return conv_data;
 }
 
+void ReadData(wifstream& file, STUD_READ_DATA &data)
+{
+	getline(file, data.surname, L',');
+	for (int k = 0; k < NUM_OF_MARKS; k++)
+	{
+		file >> data.marks[k];
+		file.ignore(1, L',');
+	}
+	getline(file, data.is_contract);
+}
+
+void ProcedeFile(const string& file_path, vector<STUD_TABLE_DATA>& Table)
+{
+	wifstream MyFile(file_path);
+	int num_of_data;
+	MyFile >> num_of_data;
+	MyFile.ignore(1, '\n');
+	STUD_READ_DATA data;
+	for (int j = 0; j < num_of_data; ++j)
+	{
+		ReadData(MyFile, data);
+		Table.push_back(Read_to_Table(data));
+	}
+	MyFile.close();
+}
+
 void ProcedeFiles(const vector<string>& file_paths, vector<STUD_TABLE_DATA>&Table)
 {
-	wifstream MyFile;
 	for (int i = 0; i < file_paths.size(); ++i)
 	{
-		MyFile.open(file_paths[i]);
-		int num_of_data;
-		MyFile >> num_of_data;
-		MyFile.ignore(1,'\n');
-		STUD_READ_DATA data;
-		for (int j = 0; j < num_of_data; ++j)
-		{
-			getline(MyFile, data.surname,L',');
-			for (int k = 0; k < NUM_OF_MARKS; k++)
-			{
-				MyFile >> data.marks[k];
-				MyFile.ignore(1, L',');
-			}
-			getline(MyFile, data.is_contract);
-			Table.push_back(Read_to_Table(data));
-		}
-		MyFile.close();
+		ProcedeFile(file_paths[i], Table);
 	}
 }
 
@@ -136,3 +145,10 @@ float GetMinScholarGPA(const vector<STUD_TABLE_DATA>& ScholarTable)
 	}
 	return ScholarTable[ScholarTable.size() * (PESENT_OF_SCHOLARHSIP / 100.0)-1].GPA;
 }
+
+
+//
+//validation and pros data
+//print out information about validation error or print data about the data
+
+//chain of responsibility 
