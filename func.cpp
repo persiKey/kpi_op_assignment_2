@@ -1,5 +1,6 @@
 #include "structs.h"
 #include "func.h"
+#include "Valid.h"
 #include <Windows.h>
 #include <string>
 #include <iostream>
@@ -58,28 +59,54 @@ STUD_TABLE_DATA Read_to_Table(STUD_READ_DATA &data)
 	return conv_data;
 }
 
+int ExtractNumber(wifstream& file)
+{
+	wstring buf;
+	getline(file, buf, L',');
+	int res = _wtoi(buf.c_str());
+	if (res == 0) file.setstate(std::ios_base::failbit);
+	return res;
+}
+
+void ReadData(wifstream& file, STUD_READ_DATA &data)
+{
+	getline(file, data.surname, L','); InputValid(file);
+	for (int k = 0; k < NUM_OF_MARKS; k++)
+	{
+		data.marks[k] = ExtractNumber(file); InputValid(file);
+		LogicalValid(file, data.marks[k]);
+	}
+	getline(file, data.is_contract); InputValid(file);
+	LogicalValid(file, data.is_contract);
+}
+
+void ProcedeFile(const string& file_path, vector<STUD_TABLE_DATA>& Table)
+{
+	wifstream MyFile(file_path);
+	State::UpdateStateFile(file_path);
+	int num_of_data;
+	MyFile >> num_of_data;
+	
+	MyFile.ignore(1, '\n');
+	STUD_READ_DATA data;
+	for (int j = 0; j < num_of_data && !MyFile.eof(); ++j)
+	{
+		State::UpdateStateLine(j);
+		ReadData(MyFile, data);
+		Table.push_back(Read_to_Table(data));
+	}
+	MyFile.close();
+}
+
 void ProcedeFiles(const vector<string>& file_paths, vector<STUD_TABLE_DATA>&Table)
 {
-	wifstream MyFile;
 	for (int i = 0; i < file_paths.size(); ++i)
 	{
-		MyFile.open(file_paths[i]);
-		int num_of_data;
-		MyFile >> num_of_data;
-		MyFile.ignore(1,'\n');
-		STUD_READ_DATA data;
-		for (int j = 0; j < num_of_data; ++j)
-		{
-			getline(MyFile, data.surname,L',');
-			for (int k = 0; k < NUM_OF_MARKS; k++)
-			{
-				MyFile >> data.marks[k];
-				MyFile.ignore(1, L',');
-			}
-			getline(MyFile, data.is_contract);
-			Table.push_back(Read_to_Table(data));
-		}
-		MyFile.close();
+		ProcedeFile(file_paths[i], Table);
+	}
+	if (State::GetState())
+	{
+		exit(-1);
 	}
 }
 
@@ -129,10 +156,8 @@ void PrintTableToFile(const vector<STUD_TABLE_DATA>& Table, int persents)
 
 float GetMinScholarGPA(const vector<STUD_TABLE_DATA>& ScholarTable)
 {
-	if (ScholarTable.size() < 100.0/PESENT_OF_SCHOLARHSIP)
-	{
-		wcout << L"Too few students!\n"; 
-		return -1;
-	}
+	LogicalValid(ScholarTable.size());
 	return ScholarTable[ScholarTable.size() * (PESENT_OF_SCHOLARHSIP / 100.0)-1].GPA;
 }
+
+
